@@ -562,7 +562,6 @@ var seeds = [
   "170145707876762",
   "27385290344965",
   "106502882904581",
-  "132843917330949",
   "256375766698501",
   "298466446199301",
   "68247610014623",
@@ -10410,7 +10409,6 @@ var seeds = [
   "87131026715024",
   "119184367645072",
   "164839870001552",
-  "269645661958544",
   "101459038328757",
   "378570328266677",
   "39096116307444",
@@ -14002,20 +14000,18 @@ var seeds = [
   "182810987572964",
   "380864814493412",
 ];
-var t = localStorage.t || "";
-function go() {
-  if (true) {
-    var n = Math.floor(Math.random() * seeds.length);
-    const seed = seeds[n];
-    const time = new Date();
-    document.getElementById("localtime").textContent = seed + " @ " + time;
-    document.querySelector("i").textContent = seed;
-    document.querySelector("i").style.color = getRandomColor();
-    go();
-  } else {
-    document.querySelector("b").textContent = "Generate Seed";
-  }
-  localStorage.t = t;
+var seedElement = document.querySelector("i");
+var generateButton = document.querySelector("b");
+var seedCountElement = document.getElementById("seedcount");
+
+function generateSeed() {
+  var n = Math.floor(Math.random() * seeds.length);
+  const seed = seeds[n];
+  const time = new Date();
+  const formattedTime = formatTime(time);
+  document.getElementById("localtime").textContent = `${seed} @ ${formattedTime}`;
+  seedElement.textContent = seed;
+  seedElement.style.color = getRandomColor();
 }
 function copy() {
   var x = document.createElement("input");
@@ -14026,30 +14022,40 @@ function copy() {
   document.body.removeChild(x);
 }
 function getRandomColor() {
-  var r, g, b;
+  const minBrightness = 90;
 
-  do {
-    r = Math.floor(Math.random() * 256);
-    g = Math.floor(Math.random() * 256);
-    b = Math.floor(Math.random() * 256);
-  } while (isCloseToBlackOrWhite(r, g, b));
+  while (true) {
+    var r = getRandomValue();
+    var g = getRandomValue();
+    var b = getRandomValue();
 
-  return `rgb(${r},${g},${b})`;
+    const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+
+    if (brightness >= minBrightness) {
+      return `rgb(${r},${g},${b})`;
+    }
+  }
 }
 
-function isCloseToBlackOrWhite(r, g, b) {
-  var threshold = 100;
-
-  return (
-    (r < threshold && g < threshold && b < threshold) ||
-    (r > 255 - threshold && g > 255 - threshold && b > 255 - threshold)
-  );
+function getRandomValue() {
+  return Math.floor(Math.random() * 256);
 }
+
+function formatTime(time) {
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  };
+  return time.toLocaleString(undefined, options);
+}
+
+generateButton.addEventListener("click", generateSeed);
 
 var seedCount = seeds.length;
-
-var seedCountElement = document.getElementById("seedcount");
-
 var formattedSeedCount = seedCount.toLocaleString();
-
 seedCountElement.textContent = "Seed Count: " + formattedSeedCount;
